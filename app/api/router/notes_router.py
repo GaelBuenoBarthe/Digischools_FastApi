@@ -1,6 +1,10 @@
 from fastapi import APIRouter
 
-from app.api.controller.notes_controller import *
+from app.api.controller.notes_controller import create_note, get_all_notes, get_notes_by_eleve, get_notes_by_professeur, \
+    get_notes_by_classe, get_notes_by_trimester, update_note, delete_note, get_notes_by_teacher_and_class, \
+    get_notes_by_student_and_trimester
+from app.util.mongo_singleton import get_db
+from app.domain.schemas.notes_schema import NoteSchema
 
 router = APIRouter()
 
