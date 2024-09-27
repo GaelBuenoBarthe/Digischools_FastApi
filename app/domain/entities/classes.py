@@ -1,25 +1,12 @@
 from pydantic import BaseModel, field_validator, ConfigDict
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 from datetime import datetime
+from app.domain.schemas.classes_schema import ClasseSchema, ProfSchema
 
-# Class pour la sous-collection Prof
-class Prof(BaseModel):
-    id: int
-    nom: str
-    prenom: str
-    date_naissance: datetime
-    adresse: str
-    sexe: str
-
-    @field_validator('sexe')
-    def validate_sexe(cls, v):
-        if v not in ["HOMME", "FEMME"]:
-            raise ValueError("sexe doit être 'HOMME' ou 'FEMME'")
-        return v
-
-# Classe pour l'entité Classe
+# Class pour la collection Classe
 class Classe(BaseModel):
     id: int
     nom: str
-    prof: Prof
+    prof: ProfSchema
 
     model_config = ConfigDict(from_attributes=True)
