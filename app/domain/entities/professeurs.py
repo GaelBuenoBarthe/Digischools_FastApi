@@ -1,4 +1,4 @@
-from app.domain.schemas import Professeur as ProfesseurSchema
+from app.domain.schemas import professeurs_schema as ProfesseurSchema
 
 class Professeur:
     def __init__(self, id: int, nom: str, prenom: str, date_naissance: str | None = None, adresse: str | None = None, sexe: str | None = None):
