@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends
 from typing import List
 from app.api.controller.classes_controller import get_all_classes, get_classe_by_id
-from app.domain.entities.classes import Classe
 from app.domain.schemas import classes_schema
 from pymongo.database import Database
 from app.util.mongo_singleton import get_db

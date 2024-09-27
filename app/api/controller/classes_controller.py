@@ -1,8 +1,5 @@
-from typing import List
 from fastapi import Depends, HTTPException
 from starlette import status
-
-from app.domain.schemas import classes_schema
 from app.util.mongo_singleton import get_db
 from pymongo.database import Database
 
