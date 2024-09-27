@@ -1,6 +1,6 @@
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field
 from datetime import datetime
-from bson import ObjectId
+from typing import Optional
 
 class ClasseSchema(BaseModel):
     id: int
@@ -36,7 +36,7 @@ class TrimestreSchema(BaseModel):
 class NoteSchema(BaseModel):
     idnotes: int
     avancement: float
-    avis: str | None = None
+    avis: Optional[str] = None
     date_saisie: datetime
     idclasse: ClasseSchema
     ideleve: EleveSchema
@@ -45,4 +45,5 @@ class NoteSchema(BaseModel):
     idtrimestre: TrimestreSchema
     note: int
 
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+    class Config:
+        arbitrary_types_allowed = True

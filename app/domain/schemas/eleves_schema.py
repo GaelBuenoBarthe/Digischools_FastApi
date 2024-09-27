@@ -1,4 +1,3 @@
-# Schéma pour l'entité Eleve (sans Pydantic)
 EleveSchema = {
     "id": int,
     "nom": str,

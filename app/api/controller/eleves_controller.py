@@ -1,5 +1,5 @@
 from fastapi import Depends, HTTPException, status
-from app.util.mongo_singleton import get_db
+from app.util.mongo_singleton import MongoSingleton as get_db
 from pymongo.database import Database
 
 async def get_all_eleves(db: Database = Depends(get_db)):

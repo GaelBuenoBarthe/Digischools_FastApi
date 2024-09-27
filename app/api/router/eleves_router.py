@@ -3,7 +3,7 @@ from typing import List
 from app.api.controller.eleves_controller import get_all_eleves, get_eleves_by_class, get_eleve_by_id
 from app.domain.schemas import eleves_schema
 from pymongo.database import Database
-from app.util.mongo_singleton import get_db
+from app.util.mongo_singleton import  MongoSingleton as get_db
 
 router = APIRouter()
 
