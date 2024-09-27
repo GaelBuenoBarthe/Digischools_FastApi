@@ -1,5 +1,4 @@
 import mysql.connector
-
 from app.util.mongo_singleton import get_db
 
 # Connexion à MySQL
@@ -73,7 +72,7 @@ for mysql_table, mongo_collection in tables.items():
             transformed_record = transform_record(record, table_structure[mysql_table])
             # Use the primary key as the filter for upsert
             primary_key = list(record.keys())[0]
-            # Verifiersi la donnée existe déjà dans la collection pour éviter les doublons
+            # Vérifier si la donnée existe déjà dans la collection pour éviter les doublons
             existing_record = mongo_db[mongo_collection].find_one({primary_key: record[primary_key]})
             if not existing_record:
                 mongo_db[mongo_collection].update_one(
@@ -85,7 +84,7 @@ for mysql_table, mongo_collection in tables.items():
         # Pas de sous-collections, insertion directe
         for record in records:
             primary_key = list(record.keys())[0]
-            # Verifier si la donnée existe déjà dans MongoDB pour éviter les doublons
+            # Vérifier si la donnée existe déjà dans MongoDB pour éviter les doublons
             existing_record = mongo_db[mongo_collection].find_one({primary_key: record[primary_key]})
             if not existing_record:
                 mongo_db[mongo_collection].update_one(
@@ -94,10 +93,105 @@ for mysql_table, mongo_collection in tables.items():
                     upsert=True
                 )
 
+# Création des vues dans MongoDB
+
+# View for Student and Trimester Aggregation
+mongo_db.command({
+    "create": "view_student_trimester",
+    "viewOn": "notes",
+    "pipeline": [
+        {
+            "$lookup": {
+                "from": "élèves",
+                "localField": "ideleve",
+                "foreignField": "id",
+                "as": "student_details"
+            }
+        },
+        {
+            "$unwind": "$student_details"
+        },
+        {
+            "$group": {
+                "_id": {
+                    "idnotes": "$idnotes",
+                    "ideleve": "$ideleve",
+                    "idclasse": "$idclasse",
+                    "idmatiere": "$idmatiere",
+                    "idprof": "$idprof",
+                    "idtrimestre": "$idtrimestre"
+                },
+                "note": {"$first": "$note"},
+                "date_saisie": {"$first": "$date_saisie"},
+                "avis": {"$first": "$avis"},
+                "avancement": {"$first": "$avancement"},
+                "student": {"$first": "$student_details"}
+            }
+        },
+        {
+            "$project": {
+                "_id": 0,
+                "idnotes": "$_id.idnotes",
+                "note": "$note",
+                "date_saisie": "$date_saisie",
+                "avis": "$avis",
+                "avancement": "$avancement",
+                "student": "$student"
+            }
+        }
+    ]
+})
+
+# View for Teacher and Class Aggregation
+mongo_db.command({
+    "create": "view_teacher_class",
+    "viewOn": "notes",
+    "pipeline": [
+        {
+            "$lookup": {
+                "from": "classes",
+                "localField": "idclasse",
+                "foreignField": "id",
+                "as": "class_details"
+            }
+        },
+        {
+            "$unwind": "$class_details"
+        },
+        {
+            "$group": {
+                "_id": {
+                    "idnotes": "$idnotes",
+                    "ideleve": "$ideleve",
+                    "idclasse": "$idclasse",
+                    "idmatiere": "$idmatiere",
+                    "idprof": "$idprof"
+                },
+                "note": {"$first": "$note"},
+                "date_saisie": {"$first": "$date_saisie"},
+                "avis": {"$first": "$avis"},
+                "avancement": {"$first": "$avancement"},
+                "class": {"$first": "$class_details"}
+            }
+        },
+        {
+            "$project": {
+                "_id": 0,
+                "idnotes": "$_id.idnotes",
+                "note": "$note",
+                "date_saisie": "$date_saisie",
+                "avis": "$avis",
+                "avancement": "$avancement",
+                "class": "$class"
+            }
+        }
+    ]
+})
+
 # Fermeture des connexions
 mysql_cursor.close()
 mysql_conn.close()
 get_db().close()
 
 # Message de succès
-print("Base de données créée et remplie avec succès avec sous-collections, sans doublons.")
+print("Base de données créée et remplie avec succès avec sous-collections, sans doublons. Vues créées avec succès.")
