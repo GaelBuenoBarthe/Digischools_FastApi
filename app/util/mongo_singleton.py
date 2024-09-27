@@ -1,7 +1,6 @@
 from pymongo import MongoClient
 from pymongo.database import Database
 
-#Création de la classe MongoDBConnection
 class get_db:
     _instance = None
 
@@ -14,3 +13,6 @@ class get_db:
 
     def get_db(self) -> Database:
         return self._instance.db
+
+    def close(self):
+        self._instance.client.close()

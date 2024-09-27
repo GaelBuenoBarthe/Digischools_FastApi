@@ -1,6 +1,4 @@
-from typing import List
 from fastapi import Depends, HTTPException, status
-from app.domain.schemas import notes_schema
 from app.util.mongo_singleton import get_db
 from pymongo.database import Database
 

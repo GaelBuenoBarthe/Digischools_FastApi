@@ -1,5 +1,6 @@
 import mysql.connector
-import pymongo
+
+from app.util.mongo_singleton import get_db
 
 # Connexion à MySQL
 mysql_conn = mysql.connector.connect(
@@ -12,17 +13,16 @@ mysql_conn = mysql.connector.connect(
 mysql_cursor = mysql_conn.cursor(dictionary=True)
 
 # Connexion à MongoDB
-mongo_client = pymongo.MongoClient("mongodb://localhost:27017/")
-mongo_db = mongo_client.digischools
+mongo_db = get_db().get_db()
 
 
-# Function to get a record by primary key from MySQL
+# Fonction pour obtenir un enregistrement par ID
 def get_record_by_id(table, id_field, id_value):
     mysql_cursor.execute(f"SELECT * FROM {table} WHERE {id_field} = %s", (id_value,))
     return mysql_cursor.fetchone()
 
 
-# Function to transform foreign key IDs into subcollections
+# Fonction pour transformer les enregistrements en remplaçant les ID par les enregistrements complets
 def transform_record(record, table_structure):
     for field, ref_table in table_structure.items():
         if field in record:
@@ -32,7 +32,7 @@ def transform_record(record, table_structure):
     return record
 
 
-# Table structure to define relationships for all tables
+# Structure des tables avec les sous-collections
 table_structure = {
     "t_notes": {
         "idclasse": {"table": "t_classe", "id_field": "id"},
@@ -47,12 +47,12 @@ table_structure = {
     "t_eleve": {
         "classe": {"table": "t_classe", "id_field": "id"}
     },
-    "t_prof": {},  # No foreign keys in t_prof
-    "t_matiere": {},  # No foreign keys in t_matiere
-    "t_trimestre": {}  # No foreign keys in t_trimestre
+    "t_prof": {},
+    "t_matiere": {},
+    "t_trimestre": {}
 }
 
-# Export and transform data from MySQL to MongoDB
+# Exporte les données de MySQL vers MongoDB
 tables = {
     "t_prof": "professeurs",
     "t_eleve": "élèves",
@@ -62,18 +62,18 @@ tables = {
     "t_classe": "classes",
 }
 
-# Insertion of data into MongoDB with subcollections
+# Insertion des données dans MongoDB avec des sous-collections
 for mysql_table, mongo_collection in tables.items():
     mysql_cursor.execute(f"SELECT * FROM {mysql_table}")
     records = mysql_cursor.fetchall()
 
-    # If this table has relationships, apply the transformation for subcollections
+    # Si la table a des sous-collections , crée les sous-collections
     if mysql_table in table_structure:
         for record in records:
             transformed_record = transform_record(record, table_structure[mysql_table])
             # Use the primary key as the filter for upsert
             primary_key = list(record.keys())[0]
-            # Check if the record already exists in MongoDB to avoid duplicates
+            # Verifiersi la donnée existe déjà dans la collection pour éviter les doublons
             existing_record = mongo_db[mongo_collection].find_one({primary_key: record[primary_key]})
             if not existing_record:
                 mongo_db[mongo_collection].update_one(
@@ -82,10 +82,10 @@ for mysql_table, mongo_collection in tables.items():
                     upsert=True
                 )
     else:
-        # No relationships, insert directly
+        # Pas de sous-collections, insertion directe
         for record in records:
             primary_key = list(record.keys())[0]
-            # Check if the record already exists in MongoDB to avoid duplicates
+            # Verifier si la donnée existe déjà dans MongoDB pour éviter les doublons
             existing_record = mongo_db[mongo_collection].find_one({primary_key: record[primary_key]})
             if not existing_record:
                 mongo_db[mongo_collection].update_one(
@@ -97,7 +97,7 @@ for mysql_table, mongo_collection in tables.items():
 # Fermeture des connexions
 mysql_cursor.close()
 mysql_conn.close()
-mongo_client.close()
+get_db().close()
 
 # Message de succès
 print("Base de données créée et remplie avec succès avec sous-collections, sans doublons.")
