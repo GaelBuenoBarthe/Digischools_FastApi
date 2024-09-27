@@ -1,10 +1,11 @@
 from app.domain.schemas import trimestres_schema as TrimestreSchema
+from datetime import datetime
 
 class Trimestre:
     def __init__(self, idtrimestre: int, nom: str, date: str | None = None):
         self.idtrimestre = idtrimestre
         self.nom = nom
-        self.date = date
+        self.date = datetime
 
     def to_dict(self):
         return {

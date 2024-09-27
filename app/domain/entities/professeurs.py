@@ -1,11 +1,12 @@
 from app.domain.schemas import professeurs_schema as ProfesseurSchema
+from datetime import datetime
 
 class Professeur:
     def __init__(self, id: int, nom: str, prenom: str, date_naissance: str | None = None, adresse: str | None = None, sexe: str | None = None):
         self.id = id
         self.nom = nom
         self.prenom = prenom
-        self.date_naissance = date_naissance
+        self.date_naissance = datetime
         self.adresse = adresse
         self.sexe = sexe
 
