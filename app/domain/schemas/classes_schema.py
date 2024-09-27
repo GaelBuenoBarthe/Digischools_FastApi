@@ -1,4 +1,3 @@
-# Schéma pour l'entité Classe (sans Pydantic)
 ClasseSchema = {
     "id": int,
     "nom": str,
