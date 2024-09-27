@@ -1,6 +1,5 @@
 import mysql.connector
 import pymongo
-from pymongo.errors import DuplicateKeyError
 
 # Connexion à MySQL
 mysql_conn = mysql.connector.connect(
@@ -31,10 +30,13 @@ for mysql_table, mongo_collection in tables.items():
     mysql_cursor.execute(f"SELECT * FROM {mysql_table}")
     records = mysql_cursor.fetchall()
     for record in records:
-        try:
-            mongo_db[mongo_collection].insert_one(record)
-        except DuplicateKeyError:
-            continue
+        # Use the primary key as the filter for upsert
+        primary_key = list(record.keys())[0]
+        mongo_db[mongo_collection].update_one(
+            {primary_key: record[primary_key]},
+            {"$set": record},
+            upsert=True
+        )
 
 # Fermeture des connexions
 mysql_cursor.close()
