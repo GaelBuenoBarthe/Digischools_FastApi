@@ -1,4 +1,4 @@
-from app.domain.schemas import Eleve as eleves_schema
+from app.domain.schemas import eleves_schema
 
 class Eleve:
     def __init__(self, id: int, nom: str, prenom: str, idclasse: int, date_naissance: str | None = None, adresse: str | None = None, sexe: str | None = None):
@@ -22,7 +22,7 @@ class Eleve:
         }
 
     @classmethod
-    def from_schema(cls, schema: EleveSchema):
+    def from_schema(cls, schema: eleves_schema):
         return cls(
             id=schema.id,
             nom=schema.nom,

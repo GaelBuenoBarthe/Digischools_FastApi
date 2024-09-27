@@ -1,13 +1,5 @@
-<<<<<<< Updated upstream
-# created by virtualenv automatically
 pyvenv.cfg
 .venv/
 .idea/
 __pycache__/
 .git/
-=======
-.venv/
-.idea/
-.git/
-__pycache__/
->>>>>>> Stashed changes

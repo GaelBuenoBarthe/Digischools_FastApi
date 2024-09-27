@@ -1,4 +1,4 @@
-from app.domain.schemas import Classe as ClasseSchema
+from app.domain.schemas import classes_schema as ClasseSchema
 
 class Classe:
     def __init__(self, id: int, nom: str, prof: int):
