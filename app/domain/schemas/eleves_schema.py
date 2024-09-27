@@ -3,7 +3,7 @@ EleveSchema = {
     "id": int,
     "nom": str,
     "prenom": str,
-    "idclasse": int,  # ID de la classe de l'élève
+    "idclasse": int,
     "date_naissance": str,
     "adresse": str,
     "sexe": str

@@ -1,6 +1,8 @@
 import mysql.connector
 import pymongo
 
+from app.util.mongo_singleton import get_db
+
 # Connexion à MySQL
 mysql_conn = mysql.connector.connect(
     host="localhost",
@@ -12,8 +14,7 @@ mysql_conn = mysql.connector.connect(
 mysql_cursor = mysql_conn.cursor(dictionary=True)
 
 # Connexion à MongoDB
-mongo_client = pymongo.MongoClient("mongodb://localhost:27017/")
-mongo_db = mongo_client.digischools
+mongo_db = get_db().get_db()
 
 # Export des données de MySQL vers MongoDB
 tables = {

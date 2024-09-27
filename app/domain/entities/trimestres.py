@@ -1,4 +1,4 @@
-from app.domain.schemas import Trimestre as TrimestreSchema
+from app.domain.schemas import trimestres_schema as TrimestreSchema
 
 class Trimestre:
     def __init__(self, idtrimestre: int, nom: str, date: str | None = None):
