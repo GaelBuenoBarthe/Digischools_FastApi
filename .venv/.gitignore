@@ -3,4 +3,4 @@ pyvenv.cfg
 .venv/
 .idea/
 __pycache__/
-
+.git/
