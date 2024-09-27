@@ -4,10 +4,16 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from starlette.requests import Request
 
+from app.api.router import notes_router
+
 app = FastAPI()
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
+
+# Include the notes router
+# Stock Endpoints
+app.include_router(notes_router.router, prefix="/notes", tags=["Notes"])
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
