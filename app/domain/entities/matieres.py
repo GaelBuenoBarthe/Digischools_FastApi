@@ -1,4 +1,4 @@
-from app.domain.schemas import Matiere as MatiereSchema
+from app.domain.schemas import matieres_schema as MatiereSchema
 
 class Matiere:
     def __init__(self, id: int, nom: str):

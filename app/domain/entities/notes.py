@@ -1,4 +1,4 @@
-from app.domain.schemas import Note as NoteSchema
+from app.domain.schemas import notes_schema as NoteSchema
 
 class Note:
     def __init__(self, idnotes: int, ideleve: int, idclasse: int, idmatiere: int, idprof: int, idtrimestre: int, note: int, date_saisie: str | None = None, avis: str | None = None, avancement: float | None = None):
