@@ -1,34 +1,26 @@
-from app.domain.schemas import eleves_schema
+from pydantic import BaseModel, Field, field_validator, ConfigDict
+from datetime import datetime
 
-class Eleve:
-    def __init__(self, id: int, nom: str, prenom: str, idclasse: int, date_naissance: str | None = None, adresse: str | None = None, sexe: str | None = None):
-        self.id = id
-        self.nom = nom
-        self.prenom = prenom
-        self.idclasse = idclasse
-        self.date_naissance = date_naissance
-        self.adresse = adresse
-        self.sexe = sexe
+# Classe pour la sous-collection Classe
+class Classe(BaseModel):
+    id: int
+    nom: str
+    prof: int
 
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "nom": self.nom,
-            "prenom": self.prenom,
-            "idclasse": self.idclasse,
-            "date_naissance": self.date_naissance,
-            "adresse": self.adresse,
-            "sexe": self.sexe
-        }
+# Classe pour la collection Eleve
+class Eleve(BaseModel):
+    id: int
+    adresse: str
+    classe: Classe
+    date_naissance: datetime
+    nom: str
+    prenom: str
+    sexe: str
 
-    @classmethod
-    def from_schema(cls, schema: eleves_schema):
-        return cls(
-            id=schema.id,
-            nom=schema.nom,
-            prenom=schema.prenom,
-            idclasse=schema.idclasse,
-            date_naissance=schema.date_naissance,
-            adresse=schema.adresse,
-            sexe=schema.sexe
-        )
+    @field_validator('sexe')
+    def validate_sexe(cls, v):
+        if v not in ["HOMME", "FEMME"]:
+            raise ValueError("sexe doit être 'HOMME' ou 'FEMME'")
+        return v
+
+    model_config = ConfigDict(from_attributes=True)
