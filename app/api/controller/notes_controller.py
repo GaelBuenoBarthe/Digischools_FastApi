@@ -1,6 +1,6 @@
-import string
-
 from fastapi import Depends, HTTPException, status
+import logging
+
 from app.util.mongo_singleton import MongoSingleton
 from pymongo.database import Database
 from app.domain.schemas.notes_schema import  NoteSchema
@@ -98,24 +98,51 @@ async def get_notes_by_student_and_trimester(
     return results
 
 #Recuperer les notes par professeur et classe
-async def get_notes_by_teacher_and_class(id: int, professeur_id: int, db: Database = Depends(MongoSingleton)):
-    # Query the view directly to filter by professor and class name
+async def get_notes_by_teacher_and_class(classes_id: int, professeur_id: int, db: Database = Depends(MongoSingleton.get_db)):
     query = {
-        "prof_id": professeur_id,  # Filter by professor ID
-        "classe_id": id  # Filter by class ID
-
+        "classe_id": classes_id,
+        "prof_id": professeur_id
     }
 
-    # Query the MongoDB view that has the aggregation logic implemented
-    notes = list(db.view_teacher_lecture.find(query))  # Replace `your_view_name` with the actual view name
+    notes = list(db.view_teacher_lecture.find(query))
 
-    # Handle case where no notes are found
     if not notes:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"No notes found for professor ID {professeur_id} in class  with id {id}"
+            detail=f"Pas de notes trouvées pour le professeur avec l'ID {professeur_id} dans la classe avec l'ID {classes_id}"
         )
 
-    # Return the notes as the response
-    return notes
+    # Debug logging to check the structure of the notes
+    logging.debug(f"Notes fetched from the database: {notes}")
 
+    try:
+        note_details = [
+            NoteDetail(
+                eleve_id=note['eleve_id'],
+                eleve_nom=note['eleve_nom'],
+                eleve_prenom=note['eleve_prenom'],
+                matiere_nom=note['matiere_nom'],
+                trimestre_nom=note['trimestre_nom'],
+                trimestre_start=note['trimestre_start'],
+                note=note['note']
+            )
+            for note in notes
+        ]
+    except KeyError as e:
+        logging.error(f"KeyError: {e} - Check the structure of the note: {note}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"KeyError: {e} - Check the structure of the note data."
+        )
+
+    response = NoteReponseProfClass(
+        classe_nom=notes[0]['classe_nom'],
+        classe_prof=notes[0]['classe_prof'],
+        prof_nom=notes[0]['prof_nom'],
+        prof_prenom=notes[0]['prof_prenom'],
+        notes=note_details,
+        classe_id=classes_id,
+        prof_id=professeur_id
+    )
+
+    return response
