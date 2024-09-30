@@ -17,9 +17,9 @@ async def read_all_eleves(db: Database = Depends(MongoSingleton.get_db)):
 async def create_eleve_endpoint(eleve: Eleve, db: Database = Depends(MongoSingleton.get_db)):
     return await create_eleve(eleve, db)
 
-@router.put("/{eleve_id}", response_model=Eleve)
-async def update_eleve_endpoint(eleve_id: int, updated_eleve: Eleve, db: Database = Depends(MongoSingleton.get_db)):
-    return await update_eleve(eleve_id, updated_eleve, db)
+@router.put("/{eleve_id}", response_model=EleveSchema)
+async def update_eleve_endpoint(eleve_id: int, eleve: EleveSchema, db: Database = Depends(MongoSingleton.get_db)):
+    return await update_eleve(eleve_id, eleve, db)
 
 @router.delete("/{eleve_id}", response_model=dict)
 async def delete_eleve_endpoint(eleve_id: int, db: Database = Depends(MongoSingleton.get_db)):

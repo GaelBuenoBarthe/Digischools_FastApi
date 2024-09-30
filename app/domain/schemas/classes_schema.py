@@ -22,4 +22,5 @@ class ClasseSchema(BaseModel):
     nom: str
     prof: ProfSchema
 
-    model_config = ConfigDict(from_attributes=True)
+    class Config:
+        from_attributes = True
