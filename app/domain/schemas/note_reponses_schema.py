@@ -1,3 +1,4 @@
+from datetime import datetime
 from pydantic import BaseModel
 from typing import Any, List
 
@@ -7,17 +8,14 @@ class NoteDetail(BaseModel):
     eleve_prenom: str
     matiere_nom: str
     trimestre_nom: str
-    trimestre_start: Any
+    trimestre_start: datetime
     note: int
 
-class NoteReponseStuTri(BaseModel):
-    eleve_id: int
-    eleve_nom: str
-    eleve_prenom: str
-    matiere_nom: str
-    trimestre_nom: str
-    trimestre_start: Any
-    note: int
+    class Config:
+        from_attributes = True
+
+from pydantic import BaseModel
+from typing import List
 
 class NoteReponseProfClass(BaseModel):
     classe_nom: str
