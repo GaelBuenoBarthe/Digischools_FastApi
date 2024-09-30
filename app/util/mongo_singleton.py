@@ -19,3 +19,7 @@ class MongoSingleton:
 
     def close(self):
         self._instance.client.close()
+
+# Function to get the database instance
+def get_db() -> Database:
+    return MongoSingleton().get_db()

@@ -1,5 +1,5 @@
 import mysql.connector
-from app.util.mongo_singleton import MongoSingleton
+from app.util.mongo_singleton import get_db, MongoSingleton
 
 # Connexion à MySQL
 mysql_conn = mysql.connector.connect(
@@ -12,7 +12,7 @@ mysql_conn = mysql.connector.connect(
 mysql_cursor = mysql_conn.cursor(dictionary=True)
 
 # Connexion à MongoDB
-mongo_db = MongoSingleton
+mongo_db = get_db()
 
 # Fonction pour obtenir un enregistrement par ID
 def get_record_by_id(table, id_field, id_value):
@@ -51,7 +51,7 @@ table_structure = {
 # Exporte les données de MySQL vers MongoDB
 tables = {
     "t_prof": "professeurs",
-    "t_eleve": "élèves",
+    "t_eleve": "eleves",
     "t_notes": "notes",
     "t_trimestre": "trimestres",
     "t_matiere": "matieres",
@@ -222,7 +222,7 @@ create_mongo_views()
 # Fermeture des connexions
 mysql_cursor.close()
 mysql_conn.close()
-mongo_db.close(mongo_db)
+MongoSingleton().close()
 
 # Message de succès
-print("Base de données créée et remplie avec succès avec sous-collections, sans doublons. Vues créées avec succès.")
+print("Base de données créée et remplie avec succès avec sous-collections, sans doublons.")
