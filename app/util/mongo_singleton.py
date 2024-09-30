@@ -11,8 +11,11 @@ class MongoSingleton:
             cls._instance.db = cls._instance.client.digischools
         return cls._instance
 
-    def get_db(self) -> Database:
-        return self._instance.db
+    @staticmethod
+    def get_db() -> Database:
+        if MongoSingleton._instance is None:
+            MongoSingleton()
+        return MongoSingleton._instance.db
 
     def close(self):
         self._instance.client.close()

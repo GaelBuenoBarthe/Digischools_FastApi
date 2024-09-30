@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from starlette import status
-from app.util.mongo_singleton import get_db
+from app.util.mongo_singleton import MongoSingleton as get_db
 from pymongo.database import Database
 from app.domain.entities.classes import Classe
 
