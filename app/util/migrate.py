@@ -91,7 +91,6 @@ for mysql_table, mongo_collection in tables.items():
                 )
 
 # Création des vues dans MongoDB (uniquement après la migration des données)
-
 def create_mongo_views():
     # View for Student and Trimester Aggregation
     mongo_db.command({
@@ -121,22 +120,22 @@ def create_mongo_views():
             },
             {
                 "$sort": {
-                    "_id.eleve_id": 1,  # Sort by student ID (ascending)
-                    "_id.trimestre_id": 1  # Sort by trimester ID (ascending)
+                    "_id.eleve_id": 1,
+                    "_id.trimestre_id": 1
                 }
             },
             {
                 "$project": {
-                    "_id": 0,  # Exclude the internal MongoDB _id field from the output
-                    "eleve_id": "$_id.eleve_id",  # Include the student ID
-                    "eleve_nom": 1,  # Include the student name
-                    "eleve_prenom": 1,  # Include the student first name
-                    "classe": 1,  # Include the class
-                    "trimestre_id": "$_id.trimestre_id",  # Include the trimester ID
-                    "trimestre_nom": 1,  # Include the trimester name
-                    "trimestre_start": 1,  # Include the trimester start date
-                    "notes": 1,  # Include the list of notes
-                    "average_note": 1  # Include the average note
+                    "_id": 0,
+                    "eleve_id": "$_id.eleve_id",
+                    "eleve_nom": 1,
+                    "eleve_prenom": 1,
+                    "classe": 1,
+                    "trimestre_id": "$_id.trimestre_id",
+                    "trimestre_nom": 1,
+                    "trimestre_start": 1,
+                    "notes": 1,
+                    "average_note": 1
                 }
             }
         ]
@@ -216,7 +215,6 @@ def create_mongo_views():
         ]
     })
 
-
 # Only create views after data migration is complete
 create_mongo_views()
 
@@ -227,4 +225,3 @@ MongoSingleton().close()
 
 # Message de succès
 print("Base de données créée et remplie avec succès avec sous-collections, sans doublons.")
-
