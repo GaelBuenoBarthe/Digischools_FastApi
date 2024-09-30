@@ -1,79 +1,59 @@
 from pydantic import BaseModel, Field
-from datetime import datetime
-from typing import Optional, List
+from typing import Any
 
-
-class ClasseSchema(BaseModel):
+class ClassModel(BaseModel):
     id: int
     nom: str
     prof: int
 
-class EleveSchema(BaseModel):
+class StudentModel(BaseModel):
     id: int
     nom: str
     prenom: str
     classe: int
-    date_naissance: datetime
+    date_naissance: Any
     adresse: str
     sexe: str
 
-class MatiereSchema(BaseModel):
-    idmatiere: int
-    nom: str
-
-class ProfSchema(BaseModel):
+class ProfModel(BaseModel):
     id: int
     nom: str
     prenom: str
-    date_naissance: datetime
+    date_naissance: Any
     adresse: str
     sexe: str
-
-class TrimestreSchema(BaseModel):
-    idtrimestre: int
-    nom: str
-    date: datetime
 
 class NoteSchema(BaseModel):
-    idnotes: int
-    avancement: float
-    avis: Optional[str] = None
-    date_saisie: datetime
-    idclasse: ClasseSchema
-    ideleve: EleveSchema
-    idmatiere: MatiereSchema
-    idprof: ProfSchema
-    idtrimestre: TrimestreSchema
     note: int
+    date_saisie: Any
+    avis: str
+    avancement: str
+    class_: ClassModel = Field(..., alias='class')
+    student: StudentModel
+    prof: ProfModel
+    idnotes: int
+    idclasse: int
+    ideleve: int
+    idprof: int
 
     class Config:
-        arbitrary_types_allowed = True
-
+        populate_by_name = True
 
 class NoteReponse1(BaseModel):
-    eleve_nom: str
-    eleve_prenom: str
-    classe: int
-    trimestre_nom: str
-    trimestre_start: datetime
-    notes: List[int]  # Changed to List[int] for proper array handling
-    average_note: float
-    eleve_id: int  # Added field for student ID
-    trimestre_id: int  # Added field for trimester ID
-
-    class Config:
-        arbitrary_types_allowed = True
+    note: int
+    avis: str
+    avancement: str
+    idnotes: int
+    idclasse: int
+    ideleve: int
+    idprof: int
 
 class NoteReponse2(BaseModel):
     note: int
-    date_saisie: datetime
-    avis : str
+    date_saisie: Any
+    avis: str
     avancement: str
-    idclasse: ClasseSchema
-    ideleve: EleveSchema
-    idprof: ProfSchema
     idnotes: int
-
-
-    class Config:
-        arbitrary_types_allowed = True
+    idclasse: int
+    ideleve: int
+    idprof: int

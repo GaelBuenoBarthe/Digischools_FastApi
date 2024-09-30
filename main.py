@@ -15,18 +15,17 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 # Route pour la page d'accueil
-# Include the notes router
-# Stock Endpoints
 app.include_router(notes_router.router, prefix="/notes", tags=["Notes"])
 app.include_router(matieres_router.router, prefix="/matieres", tags=["Matieres"])
+
+# Inclure les routeurs
+app.include_router(classes_router, prefix="/classes", tags=["classes"])
+app.include_router(eleves_router, prefix="/eleves", tags=["eleves"])
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
-# Inclure les routeurs
-app.include_router(classes_router, prefix="/classes", tags=["classes"])
-app.include_router(eleves_router, prefix="/eleves", tags=["eleves"])
 
 # Exécuter l'application avec Uvicorn
 if __name__ == "__main__":

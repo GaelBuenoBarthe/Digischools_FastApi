@@ -96,23 +96,25 @@ async def get_notes_by_student_and_trimester(
     # Return the retrieved results
     return results
 
-#get notes by Teachr and class
-async def get_notes_by_teacher_and_class(nom: str, professeur_id: int, db: Database = Depends(MongoSingleton)):
-    # Query the view directly to filter by professor and class name
+#Recuperer les notes par professeur et classe
+async def get_notes_by_teacher_and_class(classes_id: int, professeur_id: int, db: Database = Depends(MongoSingleton.get_db)):
     query = {
-        "class.nom": nom,  # Filter by class name
-        "prof.id": professeur_id  # Filter by professor ID
+        "class.id": classes_id,
+        "prof.id": professeur_id
     }
 
-    # Query the MongoDB view that has the aggregation logic implemented
-    notes = list(db.view_prof_class.find(query))
+    notes = list(db.view_teacher_class.find(query))
 
-    # Handle case where no notes are found
     if not notes:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"No notes found for professor ID {professeur_id} in class {nom}"
+            detail=f"Pas de notes trouvées pour le professeur avec l'ID {professeur_id} dans la classe avec l'ID {classes_id}"
         )
 
-    # Return the notes as the response
+    for note in notes:
+        note['idclasse'] = note['class']['id']
+        note['ideleve'] = note['student']['id']
+        note['idprof'] = note['prof']['id']
+        note['avancement'] = str(note['avancement'])
+
     return notes
