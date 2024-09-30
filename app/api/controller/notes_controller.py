@@ -1,9 +1,10 @@
-import string
-
 from fastapi import Depends, HTTPException, status
+import logging
+
 from app.util.mongo_singleton import MongoSingleton
 from pymongo.database import Database
-from app.domain.schemas.notes_schema import  NoteSchema, NoteReponse1, NoteReponse2
+from app.domain.schemas.notes_schema import  NoteSchema
+from app.domain.schemas.note_reponses_schema import *
 
 
 # Create a new note
@@ -90,31 +91,41 @@ async def get_notes_by_student_and_trimester(
     if not results:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"No notes found for student ID {eleveid} in trimester {trimesterid}"
+            detail=f"Pas de notes pour l'élève avec l'ID {eleveid} au trimestre {trimesterid}"
         )
 
     # Return the retrieved results
     return results
 
 #Recuperer les notes par professeur et classe
-async def get_notes_by_teacher_and_class(classes_id: int, professeur_id: int, db: Database = Depends(MongoSingleton.get_db)):
-    query = {
-        "class.id": classes_id,
-        "prof.id": professeur_id
-    }
+async def get_notes_by_teacher_and_class(classes_id: int, professeur_id: int, db: Database):
+    try:
+        notes = list(db.view_teacher_lecture.find({"classe_id": classes_id, "prof_id": professeur_id}, projection={"_id": False}))
+        if not notes:
+            raise HTTPException(status_code=404, detail="Aucunes notes trouvées pour cette classe et ce professeur")
 
-    notes = list(db.view_teacher_class.find(query))
+        note_details = [
+            NoteDetail(
+                eleve_id=note['eleve_id'],
+                eleve_nom=note['eleve_nom'],
+                eleve_prenom=note['eleve_prenom'],
+                matiere_nom=note['matiere_nom'],
+                trimestre_nom=note['trimestre_nom'],
+                trimestre_start=note['trimestre_start'],
+                note=note['note']
+            )
+            for note in notes[0]['notes']
+        ]
 
-    if not notes:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Pas de notes trouvées pour le professeur avec l'ID {professeur_id} dans la classe avec l'ID {classes_id}"
+        return NoteReponseProfClass(
+            classe_nom=notes[0]['classe_nom'],
+            classe_prof=notes[0]['classe_prof'],
+            prof_nom=notes[0]['prof_nom'],
+            prof_prenom=notes[0]['prof_prenom'],
+            notes=note_details,
+            classe_id=notes[0]['classe_id'],
+            prof_id=notes[0]['prof_id']
         )
-
-    for note in notes:
-        note['idclasse'] = note['class']['id']
-        note['ideleve'] = note['student']['id']
-        note['idprof'] = note['prof']['id']
-        note['avancement'] = str(note['avancement'])
-
-    return notes
+    except KeyError as e:
+        logging.error(f"KeyError: {e} - Check the structure of the note")
+        raise HTTPException(status_code=500, detail=f"KeyError: {e} - Verifier la structure de note")
