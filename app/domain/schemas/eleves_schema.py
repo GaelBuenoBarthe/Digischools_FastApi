@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, field_validator, ConfigDict
+from pydantic import BaseModel, Field, validator, ConfigDict, field_validator
 from datetime import datetime
 
 class ClasseSchema(BaseModel):
@@ -7,7 +7,7 @@ class ClasseSchema(BaseModel):
     prof: int
 
 class EleveSchema(BaseModel):
-    id: int
+    id: int = Field(..., description="Unique identifier for the eleve")
     adresse: str
     classe: ClasseSchema
     date_naissance: datetime
@@ -21,4 +21,5 @@ class EleveSchema(BaseModel):
             raise ValueError("sexe doit être 'HOMME' ou 'FEMME'")
         return v
 
-    model_config = ConfigDict(from_attributes=True)
+    class Config:
+        from_attributes = True
