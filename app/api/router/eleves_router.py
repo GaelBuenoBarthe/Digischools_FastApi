@@ -8,7 +8,7 @@ from app.util.mongo_singleton import get_db
 router = APIRouter()
 
 @router.get("/", response_model=List[EleveSchema])
-async def read_eleves(db: Database = Depends(get_db)):
+async def read_all_eleves(db: Database = Depends(get_db)):
     return await get_all_eleves(db)
 
 @router.get("/classe/{classe_id}", response_model=List[EleveSchema])
@@ -16,5 +16,5 @@ async def read_eleves_by_classe(classe_id: int, db: Database = Depends(get_db)):
     return await get_eleves_by_class(classe_id, db)
 
 @router.get("/{eleve_id}", response_model=EleveSchema)
-async def read_eleve(eleve_id: int, db: Database = Depends(get_db)):
+async def read_eleve_by_id(eleve_id: int, db: Database = Depends(get_db)):
     return await get_eleve_by_id(eleve_id, db)

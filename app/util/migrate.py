@@ -1,6 +1,5 @@
 import mysql.connector
-
-from app.util.mongo_singleton import get_db
+from app.util.mongo_singleton import get_db, MongoSingleton
 
 # Connexion à MySQL
 mysql_conn = mysql.connector.connect(
@@ -13,14 +12,12 @@ mysql_conn = mysql.connector.connect(
 mysql_cursor = mysql_conn.cursor(dictionary=True)
 
 # Connexion à MongoDB
-mongo_db = get_db().get_db()
-
+mongo_db = get_db()
 
 # Fonction pour obtenir un enregistrement par ID
 def get_record_by_id(table, id_field, id_value):
     mysql_cursor.execute(f"SELECT * FROM {table} WHERE {id_field} = %s", (id_value,))
     return mysql_cursor.fetchone()
-
 
 # Fonction pour transformer les enregistrements en remplaçant les ID par les enregistrements complets
 def transform_record(record, table_structure):
@@ -30,7 +27,6 @@ def transform_record(record, table_structure):
             if ref_record:
                 record[field] = ref_record  # Embed the full referenced record instead of the ID
     return record
-
 
 # Structure des tables avec les sous-collections
 table_structure = {
@@ -55,7 +51,7 @@ table_structure = {
 # Exporte les données de MySQL vers MongoDB
 tables = {
     "t_prof": "professeurs",
-    "t_eleve": "élèves",
+    "t_eleve": "eleves",
     "t_notes": "notes",
     "t_trimestre": "trimestres",
     "t_matiere": "matieres",
@@ -97,7 +93,7 @@ for mysql_table, mongo_collection in tables.items():
 # Fermeture des connexions
 mysql_cursor.close()
 mysql_conn.close()
-get_db().close()
+MongoSingleton().close()
 
 # Message de succès
 print("Base de données créée et remplie avec succès avec sous-collections, sans doublons.")

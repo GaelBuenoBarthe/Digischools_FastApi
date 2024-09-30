@@ -8,9 +8,9 @@ from app.util.mongo_singleton import get_db
 router = APIRouter()
 
 @router.get("/", response_model=List[ClasseSchema])
-async def read_classes(db: Database = Depends(get_db)):
+async def read_all_classes(db: Database = Depends(get_db)):
     return await get_all_classes(db)
 
 @router.get("/{classe_id}", response_model=ClasseSchema)
-async def read_classe(classe_id: int, db: Database = Depends(get_db)):
+async def read_classe_by_id(classe_id: int, db: Database = Depends(get_db)):
     return await get_classe_by_id(classe_id, db)

@@ -19,8 +19,8 @@ async def read_root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 # Inclure les routeurs
-app.include_router(classes_router, prefix="/api", tags=["classes"])
-app.include_router(eleves_router, prefix="/api", tags=["eleves"])
+app.include_router(classes_router, prefix="/classes", tags=["classes"])
+app.include_router(eleves_router, prefix="/eleves", tags=["eleves"])
 
 # Exécuter l'application avec Uvicorn
 if __name__ == "__main__":
