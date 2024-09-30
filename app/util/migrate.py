@@ -1,5 +1,5 @@
 import mysql.connector
-from app.util.mongo_singleton import get_db
+from app.util.mongo_singleton import MongoSingleton
 
 # Connexion à MySQL
 mysql_conn = mysql.connector.connect(
@@ -12,7 +12,7 @@ mysql_conn = mysql.connector.connect(
 mysql_cursor = mysql_conn.cursor(dictionary=True)
 
 # Connexion à MongoDB
-mongo_db = get_db().get_db()
+mongo_db = MongoSingleton
 
 # Fonction pour obtenir un enregistrement par ID
 def get_record_by_id(table, id_field, id_value):
@@ -70,7 +70,7 @@ for mysql_table, mongo_collection in tables.items():
             # Use the primary key as the filter for upsert
             primary_key = list(record.keys())[0]
             # Vérifier si la donnée existe déjà dans la collection pour éviter les doublons
-            existing_record = mongo_db[mongo_collection].find_one({primary_key: record[primary_key]})
+            existing_record = mongo_db.get_db()[mongo_collection].find_one({primary_key: record[primary_key]})
             if not existing_record:
                 mongo_db[mongo_collection].update_one(
                     {primary_key: record[primary_key]},
@@ -82,7 +82,7 @@ for mysql_table, mongo_collection in tables.items():
         for record in records:
             primary_key = list(record.keys())[0]
             # Vérifier si la donnée existe déjà dans MongoDB pour éviter les doublons
-            existing_record = mongo_db[mongo_collection].find_one({primary_key: record[primary_key]})
+            existing_record = mongo_db.get_db()[mongo_collection].find_one({primary_key: record[primary_key]})
             if not existing_record:
                 mongo_db[mongo_collection].update_one(
                     {primary_key: record[primary_key]},
@@ -94,7 +94,7 @@ for mysql_table, mongo_collection in tables.items():
 
 def create_mongo_views():
     # View for Student and Trimester Aggregation
-    mongo_db.command({
+    mongo_db.get_db().command({
         'create': 'view_stu_tri',
         'viewOn': 'notes',
         'pipeline': [
@@ -143,7 +143,7 @@ def create_mongo_views():
     })
 
     # View for Teacher and Class Aggregation
-    mongo_db.command({
+    mongo_db.get_db().command({
         'create': 'view_teacher_class',
         'viewOn': 'notes',
         'pipeline': [
@@ -222,7 +222,7 @@ create_mongo_views()
 # Fermeture des connexions
 mysql_cursor.close()
 mysql_conn.close()
-get_db().close()
+mongo_db.close(mongo_db)
 
 # Message de succès
 print("Base de données créée et remplie avec succès avec sous-collections, sans doublons. Vues créées avec succès.")

@@ -4,7 +4,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from starlette.requests import Request
 
-from app.api.router import notes_router
+from app.api.router import notes_router, matieres_router
 
 app = FastAPI()
 
@@ -14,6 +14,7 @@ templates = Jinja2Templates(directory="templates")
 # Include the notes router
 # Stock Endpoints
 app.include_router(notes_router.router, prefix="/notes", tags=["Notes"])
+app.include_router(matieres_router.router, prefix="/matieres", tags=["Matieres"])
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):

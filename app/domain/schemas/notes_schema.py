@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
+
 
 class ClasseSchema(BaseModel):
     id: int
@@ -44,6 +45,35 @@ class NoteSchema(BaseModel):
     idprof: ProfSchema
     idtrimestre: TrimestreSchema
     note: int
+
+    class Config:
+        arbitrary_types_allowed = True
+
+
+class NoteReponse1(BaseModel):
+    eleve_nom: str
+    eleve_prenom: str
+    classe: int
+    trimestre_nom: str
+    trimestre_start: datetime
+    notes: List[int]  # Changed to List[int] for proper array handling
+    average_note: float
+    eleve_id: int  # Added field for student ID
+    trimestre_id: int  # Added field for trimester ID
+
+    class Config:
+        arbitrary_types_allowed = True
+
+class NoteReponse2(BaseModel):
+    note: int
+    date_saisie: datetime
+    avis : str
+    avancement: str
+    idclasse: ClasseSchema
+    ideleve: EleveSchema
+    idprof: ProfSchema
+    idnotes: int
+
 
     class Config:
         arbitrary_types_allowed = True
