@@ -144,75 +144,78 @@ def create_mongo_views():
 
     # View for Teacher and Class Aggregation
     mongo_db.command({
-        'create': 'view_teacher_class',
-        'viewOn': 'notes',
+        'create': 'view_teacher_lecture',  # Name of the view
+        'viewOn': 'notes',  # Base collection to create the view from
         'pipeline': [
             {
-                "$lookup": {
-                    "from": "classes",  # Join with the classes collection
-                    "localField": "idclasse",  # Local field from notes
-                    "foreignField": "id",  # Foreign field from classes
-                    "as": "class_details"  # Output array field for class details
+                "$addFields": {
+                    "classe_id": "$idclasse.id",
+                    "classe_nom": "$idclasse.nom",
+                    "classe_prof": "$idclasse.prof",
+
+                    "eleve_id": "$ideleve.id",
+                    "eleve_nom": "$ideleve.nom",
+                    "eleve_prenom": "$ideleve.prenom",
+                    "eleve_classe": "$ideleve.classe",
+                    "eleve_date_naissance": "$ideleve.date_naissance",
+                    "eleve_adresse": "$ideleve.adresse",
+                    "eleve_sexe": "$ideleve.sexe",
+
+                    "matiere_id": "$idmatiere.idmatiere",
+                    "matiere_nom": "$idmatiere.nom",
+
+                    "prof_id": "$idprof.id",
+                    "prof_nom": "$idprof.nom",
+                    "prof_prenom": "$idprof.prenom",
+                    "prof_date_naissance": "$idprof.date_naissance",
+                    "prof_adresse": "$idprof.adresse",
+                    "prof_sexe": "$idprof.sexe",
+
+                    "trimestre_id": "$idtrimestre.idtrimestre",
+                    "trimestre_nom": "$idtrimestre.nom",
+                    "trimestre_start": "$idtrimestre.date",
+
+                    "note": "$note"
                 }
-            },
-            {
-                "$lookup": {
-                    "from": "élèves",  # Join with the students collection
-                    "localField": "ideleve",  # Local field from notes
-                    "foreignField": "id",  # Foreign field from students
-                    "as": "student_details"  # Output array field for student details
-                }
-            },
-            {
-                "$lookup": {
-                    "from": "professeurs",  # Join with the teachers collection
-                    "localField": "idprof",  # Local field from notes
-                    "foreignField": "id",  # Foreign field from teachers
-                    "as": "prof_details"  # Output array field for teacher details
-                }
-            },
-            {
-                "$unwind": "$idclasse"  # Unwind the class details
-            },
-            {
-                "$unwind": "$ideleve"  # Unwind the student details
-            },
-            {
-                "$unwind": "$idprof"  # Unwind the teacher details
             },
             {
                 "$group": {
                     "_id": {
-                        "idnotes": "$idnotes",  # Group by note ID
-                        "ideleve": "$ideleve",  # Group by student ID
-                        "idclasse": "$idclasse",  # Group by class ID
-                        "idmatiere": "$idmatiere",  # Group by subject ID
-                        "idprof": "$idprof"  # Group by teacher ID
+                        "classe_id": "$classe_id",  # Group by class ID
+                        "prof_id": "$prof_id"  # Group by professor ID
                     },
-                    "note": {"$first": "$note"},  # Get the note
-                    "date_saisie": {"$first": "$date_saisie"},  # Get the entry date
-                    "avis": {"$first": "$avis"},  # Get comments
-                    "avancement": {"$first": "$avancement"},  # Get progress
-                    "class": {"$first": "$idclasse"},  # Get class details
-                    "student": {"$first": "$ideleve"},  # Get student details
-                    "prof": {"$first": "$idprof"}  # Get teacher details
+                    "classe_nom": {"$first": "$classe_nom"},
+                    "classe_prof": {"$first": "$classe_prof"},
+                    "prof_nom": {"$first": "$prof_nom"},
+                    "prof_prenom": {"$first": "$prof_prenom"},
+                    "notes": {
+                        "$push": {
+                            "eleve_id": "$eleve_id",
+                            "eleve_nom": "$eleve_nom",
+                            "eleve_prenom": "$eleve_prenom",
+                            "matiere_nom": "$matiere_nom",
+                            "trimestre_nom": "$trimestre_nom",
+                            "trimestre_start": "$trimestre_start",
+                            "note": "$note"
+                        }
+                    }
                 }
             },
             {
                 "$project": {
-                    "_id": 0,  # Exclude the internal MongoDB _id field from the output
-                    "idnotes": "$_id.idnotes",  # Include the note ID
-                    "note": 1,  # Include the note
-                    "date_saisie": 1,  # Include the entry date
-                    "avis": 1,  # Include comments
-                    "avancement": 1,  # Include progress
-                    "class": 1,  # Include class details
-                    "student": 1,  # Include student details
-                    "prof": 1  # Include teacher details
+                    "_id": 0,  # Exclude the MongoDB internal _id field
+                    "classe_id": "$_id.classe_id",
+                    "prof_id": "$_id.prof_id",
+                    "classe_nom": 1,
+                    "classe_prof": 1,
+                    "prof_nom": 1,
+                    "prof_prenom": 1,
+                    "notes": 1
                 }
             }
         ]
     })
+
 
 # Only create views after data migration is complete
 create_mongo_views()
@@ -224,3 +227,4 @@ MongoSingleton().close()
 
 # Message de succès
 print("Base de données créée et remplie avec succès avec sous-collections, sans doublons.")
+
