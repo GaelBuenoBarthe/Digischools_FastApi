@@ -1,4 +1,3 @@
-# Schéma pour l'entité Professeur (sans Pydantic)
 ProfesseurSchema = {
     "id": int,
     "nom": str,

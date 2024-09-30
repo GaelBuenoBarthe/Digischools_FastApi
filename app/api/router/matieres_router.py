@@ -3,7 +3,7 @@ from typing import List
 from app.api.controller.matieres_controller import get_all_matieres, get_matiere_by_id
 from app.domain.schemas import matieres_schema
 from pymongo.database import Database
-from app.util.mongo_singleton import get_db
+from app.util.mongo_singleton import MongoSingleton as get_db
 
 router = APIRouter()
 
