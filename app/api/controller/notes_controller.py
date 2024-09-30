@@ -3,7 +3,8 @@ import string
 from fastapi import Depends, HTTPException, status
 from app.util.mongo_singleton import MongoSingleton
 from pymongo.database import Database
-from app.domain.schemas.notes_schema import  NoteSchema, NoteReponse1, NoteReponse2
+from app.domain.schemas.notes_schema import  NoteSchema
+from app.domain.schemas.note_reponses_schema import *
 
 
 # Create a new note
@@ -96,23 +97,25 @@ async def get_notes_by_student_and_trimester(
     # Return the retrieved results
     return results
 
-#get notes by Teachr and class
-async def get_notes_by_teacher_and_class(nom: str, professeur_id: int, db: Database = Depends(MongoSingleton)):
+#Recuperer les notes par professeur et classe
+async def get_notes_by_teacher_and_class(id: int, professeur_id: int, db: Database = Depends(MongoSingleton)):
     # Query the view directly to filter by professor and class name
     query = {
-        "class.nom": nom,  # Filter by class name
-        "prof.id": professeur_id  # Filter by professor ID
+        "prof_id": professeur_id,  # Filter by professor ID
+        "classe_id": id  # Filter by class ID
+
     }
 
     # Query the MongoDB view that has the aggregation logic implemented
-    notes = list(db.view_prof_class.find(query))
+    notes = list(db.view_teacher_lecture.find(query))  # Replace `your_view_name` with the actual view name
 
     # Handle case where no notes are found
     if not notes:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"No notes found for professor ID {professeur_id} in class {nom}"
+            detail=f"No notes found for professor ID {professeur_id} in class  with id {id}"
         )
 
     # Return the notes as the response
     return notes
+
