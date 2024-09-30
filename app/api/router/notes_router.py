@@ -32,10 +32,10 @@ async def read_notes_by_student_and_trimester(
     return await get_notes_by_student_and_trimester(eleveid, trimesterid, db)
 
 
-@router.get("/professeur/{professeur_id}/classe/{classe_id}", response_model=list[NoteReponse2])
+@router.get("/professeur/{professeur_id}/classe/{classes_id}", response_model=list[NoteReponse2])
 async def read_notes_by_teacher_and_class(
-    professeur_id: int = Path(..., title="The ID of the teacher"),
-    classe_id: int = Path(..., title="The ID of the class"),
+    professeur_id: int = Path(..., title="L'ID du professeur"),
+    classes_id: int = Path(..., title="L'ID de la classe"),
     db: Database = Depends(MongoSingleton.get_db)
 ):
-    return await get_notes_by_teacher_and_class(classe_id, professeur_id, db)
+    return await get_notes_by_teacher_and_class(classes_id, professeur_id, db)
