@@ -1,13 +1,13 @@
-from fastapi import Depends, HTTPException, status
-from app.util.mongo_singleton import MongoSingleton as get_db
-from pymongo.database import Database
+from fastapi import HTTPException
+from app.util.mongo_singleton import MongoSingleton
 
-async def get_all_professeurs(db: Database = Depends(get_db)):
+
+async def get_all_professeurs(db):
     professeurs = list(db.professeurs.find(projection={"_id": False}))
     return professeurs
 
-async def get_professeur_by_id(professeur_id: int, db: Database = Depends(get_db)):
+async def get_professeur_by_id(professeur_id: int, db):
     professeur = db.professeurs.find_one({"id": professeur_id}, projection={"_id": False})
-    if professeur is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Professeur non trouvé")
+    if not professeur:
+        raise HTTPException(status_code=404, detail="Professeur not found")
     return professeur

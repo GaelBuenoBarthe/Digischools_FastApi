@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends, Path
 from pymongo.database import Database
 from app.api.controller.notes_controller import get_all_notes, get_notes_by_eleve, get_notes_by_trimester, \
     get_notes_by_student_and_trimester, get_notes_by_teacher_and_class, get_notes_by_professeur
-from app.domain.schemas.note_reponses_schema import NoteReponseStuTri, NoteReponseReponseProfClass
+from app.domain.schemas.note_reponses_schema import NoteReponseProfClass
+from app.domain.schemas.note_reponse_stutri_schema import NoteReponseStuTri
 from app.util.mongo_singleton import MongoSingleton
 from app.domain.schemas.notes_schema import NoteSchema
 
@@ -33,7 +34,7 @@ async def read_notes_by_student_and_trimester(
     return await get_notes_by_student_and_trimester(eleveid, trimesterid, db)
 
 
-@router.get("/professeur/{professeur_id}/classe/{classes_id}", response_model=list[NoteReponseReponseProfClass])
+@router.get("/professeur/{professeur_id}/classe/{classes_id}", response_model=NoteReponseProfClass)
 async def read_notes_by_teacher_and_class(
     professeur_id: int = Path(..., title="L'ID du professeur"),
     classes_id: int = Path(..., title="L'ID de la classe"),

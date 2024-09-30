@@ -47,6 +47,6 @@ class NoteSchema(BaseModel):
     note: int
 
     class Config:
-        arbitrary_types_allowed = True
+        from_attributes = True
 
 

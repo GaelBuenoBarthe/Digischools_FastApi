@@ -1,6 +1,6 @@
-import string
-
 from fastapi import Depends, HTTPException, status
+import logging
+
 from app.util.mongo_singleton import MongoSingleton
 from pymongo.database import Database
 from app.domain.schemas.notes_schema import  NoteSchema
@@ -91,31 +91,41 @@ async def get_notes_by_student_and_trimester(
     if not results:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"No notes found for student ID {eleveid} in trimester {trimesterid}"
+            detail=f"Pas de notes pour l'élève avec l'ID {eleveid} au trimestre {trimesterid}"
         )
 
     # Return the retrieved results
     return results
 
 #Recuperer les notes par professeur et classe
-async def get_notes_by_teacher_and_class(id: int, professeur_id: int, db: Database = Depends(MongoSingleton)):
-    # Query the view directly to filter by professor and class name
-    query = {
-        "prof_id": professeur_id,  # Filter by professor ID
-        "classe_id": id  # Filter by class ID
+async def get_notes_by_teacher_and_class(classes_id: int, professeur_id: int, db: Database):
+    try:
+        notes = list(db.view_teacher_lecture.find({"classe_id": classes_id, "prof_id": professeur_id}, projection={"_id": False}))
+        if not notes:
+            raise HTTPException(status_code=404, detail="Aucunes notes trouvées pour cette classe et ce professeur")
 
-    }
+        note_details = [
+            NoteDetail(
+                eleve_id=note['eleve_id'],
+                eleve_nom=note['eleve_nom'],
+                eleve_prenom=note['eleve_prenom'],
+                matiere_nom=note['matiere_nom'],
+                trimestre_nom=note['trimestre_nom'],
+                trimestre_start=note['trimestre_start'],
+                note=note['note']
+            )
+            for note in notes[0]['notes']
+        ]
 
-    # Query the MongoDB view that has the aggregation logic implemented
-    notes = list(db.view_teacher_lecture.find(query))  # Replace `your_view_name` with the actual view name
-
-    # Handle case where no notes are found
-    if not notes:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"No notes found for professor ID {professeur_id} in class  with id {id}"
+        return NoteReponseProfClass(
+            classe_nom=notes[0]['classe_nom'],
+            classe_prof=notes[0]['classe_prof'],
+            prof_nom=notes[0]['prof_nom'],
+            prof_prenom=notes[0]['prof_prenom'],
+            notes=note_details,
+            classe_id=notes[0]['classe_id'],
+            prof_id=notes[0]['prof_id']
         )
-
-    # Return the notes as the response
-    return notes
-
+    except KeyError as e:
+        logging.error(f"KeyError: {e} - Check the structure of the note")
+        raise HTTPException(status_code=500, detail=f"KeyError: {e} - Verifier la structure de note")
