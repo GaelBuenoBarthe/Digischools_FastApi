@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, Path
 from pymongo.database import Database
 from app.api.controller.notes_controller import get_all_notes, get_notes_by_eleve, get_notes_by_trimester, \
-    get_notes_by_student_and_trimester, get_notes_by_teacher_and_class, get_notes_by_professeur
+    get_notes_by_student_and_trimester, get_notes_by_teacher_and_class, get_notes_by_professeur, delete_note, \
+    update_note, create_note
 from app.domain.schemas.note_reponses_schema import NoteReponseProfClass
 from app.domain.schemas.note_reponse_stutri_schema import NoteReponseStuTri
 from app.util.mongo_singleton import MongoSingleton
@@ -12,6 +13,18 @@ router = APIRouter()
 @router.get("/", response_model=list[NoteSchema])
 async def read_all_notes(db: Database = Depends(MongoSingleton.get_db)):
     return await get_all_notes(db)
+
+@router.post("/")
+async def create_note_endpoint(note: dict, db: Database = Depends(MongoSingleton.get_db)):
+    return await create_note(note, db)
+
+@router.put("/{note_id}")
+async def update_note_endpoint(note_id: int, note: dict, db: Database = Depends(MongoSingleton.get_db)):
+    return await update_note(note_id, note, db)
+
+@router.delete("/{note_id}")
+async def delete_note_endpoint(note_id: int, db: Database = Depends(MongoSingleton.get_db)):
+    return await delete_note(note_id, db)
 
 @router.get("/eleve/{eleve_id}", response_model=list[NoteSchema])
 async def read_notes_by_eleve(eleve_id: int = Path(..., title="The ID of the student"), db: Database = Depends(MongoSingleton.get_db)):

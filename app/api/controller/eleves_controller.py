@@ -1,9 +1,10 @@
+import logging
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
 from starlette import status
 
-from app.util.migrate import mongo_db
+from app.domain.schemas.eleves_schema import EleveSchema
 from app.util.mongo_singleton import MongoSingleton
 from pymongo.database import Database
 from app.domain.entities.eleves import Eleve
@@ -33,12 +34,16 @@ async def get_eleves_by_class(classe_id: int, db: Database = Depends(MongoSingle
     return eleves
 
 # Créer un élève
-@router.post("/eleves", response_model=Eleve)
-async def create_eleve(eleve: Eleve, db: Database = Depends(MongoSingleton.get_db)):
-    if db.eleves.find_one({"id": eleve.id}):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Élève déjà existant")
+async def create_eleve(eleve: EleveSchema, db: Database = Depends(MongoSingleton.get_db)):
+    logging.info(f"Checking if eleve with id {eleve.id} exists")
+    existing_eleve = db.eleves.find_one({"id": eleve.id})
+    if existing_eleve:
+        logging.error(f"Élève with id {eleve.id} already exists")
+        raise HTTPException(status_code=400, detail="Élève déjà existant")
+
+    logging.info(f"Inserting eleve with id {eleve.id}")
     db.eleves.insert_one(eleve.model_dump())
-    return {"message": "Élève créé avec succès"}
+    return eleve
 
 # Mettre à jour un élève
 @router.put("/eleves/{eleve_id}", response_model=Eleve)

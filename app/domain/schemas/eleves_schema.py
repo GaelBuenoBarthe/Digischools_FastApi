@@ -1,13 +1,11 @@
 from pydantic import BaseModel, Field, field_validator, ConfigDict
 from datetime import datetime
 
-# Schema pour la sous-collection Prof
 class ClasseSchema(BaseModel):
     id: int
     nom: str
     prof: int
 
-# Schema pour la collection Eleve
 class EleveSchema(BaseModel):
     id: int
     adresse: str
