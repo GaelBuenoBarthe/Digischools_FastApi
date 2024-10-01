@@ -1,9 +1,10 @@
+import logging
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
 from starlette import status
 
-from app.util.migrate import mongo_db
+from app.domain.schemas.eleves_schema import EleveSchema
 from app.util.mongo_singleton import MongoSingleton
 from pymongo.database import Database
 from app.domain.entities.eleves import Eleve
@@ -33,21 +34,37 @@ async def get_eleves_by_class(classe_id: int, db: Database = Depends(MongoSingle
     return eleves
 
 # Créer un élève
-@router.post("/eleves", response_model=Eleve)
-async def create_eleve(eleve: Eleve, db: Database = Depends(MongoSingleton.get_db)):
-    if db.eleves.find_one({"id": eleve.id}):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Élève déjà existant")
+async def create_eleve(eleve: EleveSchema, db: Database = Depends(MongoSingleton.get_db)):
+    logging.info(f"Checking if eleve with id {eleve.id} exists")
+    existing_eleve = db.eleves.find_one({"id": eleve.id})
+    if existing_eleve:
+        logging.error(f"Élève with id {eleve.id} already exists")
+        raise HTTPException(status_code=400, detail="Élève avec cet ID existe déjà")
+
+    logging.info(f"Checking if eleve with same nom, prenom, and date_naissance exists")
+    duplicate_eleve = db.eleves.find_one({
+        "nom": eleve.nom,
+        "prenom": eleve.prenom,
+        "date_naissance": eleve.date_naissance
+    })
+    if duplicate_eleve:
+        logging.error("Élève with same nom, prenom, and date_naissance already exists")
+        raise HTTPException(status_code=400, detail="Élève avec ces informations existe déjà")
+
+    logging.info(f"Inserting eleve with id {eleve.id}")
     db.eleves.insert_one(eleve.model_dump())
-    return {"message": "Élève créé avec succès"}
+    return eleve
 
 # Mettre à jour un élève
-@router.put("/eleves/{eleve_id}", response_model=Eleve)
-async def update_eleve(eleve_id: int, updated_eleve: Eleve, db: Database = Depends(MongoSingleton.get_db)):
-    result = db.eleves.update_one({"id": eleve_id}, {"$set": updated_eleve.model_dump()})
+async def update_eleve(eleve_id: int, eleve: EleveSchema, db: Database = Depends(MongoSingleton.get_db)):
+    logging.info(f"Updating eleve with id {eleve_id}")
+    result = db.eleves.update_one({"id": eleve_id}, {"$set": eleve.model_dump()})
     if result.matched_count == 0:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Élève non trouvé")
-    return {"message": "Élève modifié avec succès"}
+        logging.error(f"Élève with id {eleve_id} not found")
+        raise HTTPException(status_code=404, detail="Élève non trouvé")
 
+    updated_eleve = db.eleves.find_one({"id": eleve_id})
+    return EleveSchema(**updated_eleve)
 # Supprimer un élève
 @router.delete("/eleves/{eleve_id}", response_model=dict)
 async def delete_eleve(eleve_id: int, db: Database = Depends(MongoSingleton.get_db)):

@@ -1,11 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from typing import List
-
-from pymongo.synchronous.database import Database
-
 from app.domain.schemas.matieres_schema import MatiereSchema
 from app.api.controller.matieres_controller import get_all_matieres, get_matiere_by_id
 from app.util.mongo_singleton import MongoSingleton
+from pymongo.database import Database
 
 router = APIRouter()
 
