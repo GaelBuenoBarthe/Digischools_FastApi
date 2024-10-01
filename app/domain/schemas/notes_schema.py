@@ -35,7 +35,7 @@ class TrimestreSchema(BaseModel):
     date: datetime
 
 class NoteSchema(BaseModel):
-    idnotes: int
+    idnotes: Optional[int]
     avancement: float
     avis: Optional[str] = None
     date_saisie: datetime
