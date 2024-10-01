@@ -1,4 +1,4 @@
-from app.domain.schemas import professeurs_schema as ProfesseurSchema
+from app.domain.schemas.professeur import professeurs_response_schema as ProfesseurSchema
 from datetime import datetime
 
 class Professeur:
