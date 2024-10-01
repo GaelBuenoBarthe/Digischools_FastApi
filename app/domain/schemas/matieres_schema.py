@@ -1,7 +1,7 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 class MatiereSchema(BaseModel):
-    idmatiere: int
+    idmatiere: int = Field(..., description="Identifiant unique pour matiere")
     nom: str
 
     class Config:
