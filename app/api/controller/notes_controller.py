@@ -8,13 +8,120 @@ from app.domain.schemas.note_reponses_schema import *
 
 
 # Create a new note
-async def create_note(note: NoteSchema, db: Database = Depends(MongoSingleton)):
-    existing_note = await db.notes.find_one({"idnotes": note.idnotes})
-    if existing_note:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Note already exists.")
+def create_note(note: NoteSchema, db: Database):
+    # Function to get the next ID for an entity
+    def get_next_id(collection_name: str):
+        highest_entry =  db[collection_name].find_one({}, sort=[("id", -1)])  # Replace "id" with the field used for IDs in the collection
+        return (highest_entry["id"] + 1) if highest_entry else 1  # Start from 1 if no entries
 
-    result = await db.notes.insert_one(note.dict())
-    return {"message": "Note added successfully", "id": str(result.inserted_id)}
+    # Check if the class exists; create if it does not
+    existing_classe =  db.classes.find_one({"nom": note.idclasse.nom, "prof": note.idclasse.prof})
+    if not existing_classe:
+        # Create the new class with the next ID
+        next_classe_id = get_next_id("classes")
+        classe_data = {
+            "id": next_classe_id,
+            "nom": note.idclasse.nom,
+            "prof": note.idclasse.prof,
+        }
+        db.classes.insert_one(classe_data)
+        note.idclasse.id = next_classe_id  # Update the note with the new class ID
+    else:
+        note.idclasse = existing_classe  # Embed the existing class object
+
+    # Check if the student exists; create if they do not
+    existing_eleve = db.eleves.find_one({
+        "nom": note.ideleve.nom,
+        "prenom": note.ideleve.prenom,
+        "date_naissance": note.ideleve.date_naissance
+    })
+    if not existing_eleve:
+        # Create the new student with the next ID
+        next_eleve_id = get_next_id("eleves")
+        eleve_data = {
+            "id": next_eleve_id,
+            "nom": note.ideleve.nom,
+            "prenom": note.ideleve.prenom,
+            "classe": note.ideleve.classe,
+            "date_naissance": note.ideleve.date_naissance,
+            "adresse": note.ideleve.adresse,
+            "sexe": note.ideleve.sexe,
+        }
+        db.eleves.insert_one(eleve_data)
+        note.ideleve.id = next_eleve_id  # Update the note with the new student ID
+    else:
+        note.ideleve = existing_eleve  # Embed the existing student object
+
+    # Check if the subject exists; create if it does not
+    existing_matiere = db.matieres.find_one({"nom": note.idmatiere.nom})
+    if not existing_matiere:
+        # Create the new subject with the next ID
+        next_matiere_id = get_next_id("matieres")
+        matiere_data = {
+            "id": next_matiere_id,
+            "nom": note.idmatiere.nom,
+        }
+        db.matieres.insert_one(matiere_data)
+        note.idmatiere.idmatiere = next_matiere_id  # Update the note with the new subject ID
+    else:
+        note.idmatiere = existing_matiere  # Embed the existing subject object
+
+    # Check if the professor exists; create if they do not
+    existing_prof = db.profs.find_one({
+        "nom": note.idprof.nom,
+        "prenom": note.idprof.prenom,
+        "date_naissance": note.idprof.date_naissance
+    })
+    if not existing_prof:
+        # Create the new professor with the next ID
+        next_prof_id = get_next_id("profs")
+        prof_data = {
+            "id": next_prof_id,
+            "nom": note.idprof.nom,
+            "prenom": note.idprof.prenom,
+            "date_naissance": note.idprof.date_naissance,
+            "adresse": note.idprof.adresse,
+            "sexe": note.idprof.sexe,
+        }
+        db.profs.insert_one(prof_data)
+        note.idprof.id = next_prof_id  # Update the note with the new professor ID
+    else:
+        note.idprof = existing_prof  # Embed the existing professor object
+
+    # Check if the trimester exists; create if it does not
+    existing_trimestre = db.trimestres.find_one({"nom": note.idtrimestre.nom, "date": note.idtrimestre.date})
+    if not existing_trimestre:
+        # Create the new trimester with the next ID
+        next_trimestre_id = get_next_id("trimestres")
+        trimestre_data = {
+            "id": next_trimestre_id,
+            "nom": note.idtrimestre.nom,
+            "date": note.idtrimestre.date,
+        }
+        db.trimestres.insert_one(trimestre_data)
+        note.idtrimestre.idtrimestre = next_trimestre_id  # Update the note with the new trimester ID
+    else:
+        note.idtrimestre = existing_trimestre  # Embed the existing trimester object
+
+    # Prepare the note data
+    db_note = {
+        "avancement": note.avancement,
+        "avis": note.avis,
+        "date_saisie": note.date_saisie,
+        "idclasse": note.idclasse["id"],
+        "ideleve": note.ideleve["id"],
+        "idmatiere": note.idmatiere["idmatiere"],
+        "idprof": note.idprof["id"],
+        "idtrimestre": note.idtrimestre["idtrimestre"],
+        "note": note.note,
+        "idnotes": get_next_id("notes")
+    }
+
+    # Insert the note into the database
+    result = db.notes.insert_one(db_note)
+
+    # Return the newly created note
+    return {"message": "Note added successfully", "_id": str(result.inserted_id)}
 
 
 # Get all notes

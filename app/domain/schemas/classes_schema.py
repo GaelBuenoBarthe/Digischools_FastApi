@@ -16,11 +16,13 @@ class ProfSchema(BaseModel):
             raise ValueError("sexe doit être 'HOMME' ou 'FEMME'")
         return v
 
-# Schema pour l'entité Classe
-class ClasseSchema(BaseModel):
+# Schema pour creer et modfier classe
+class ClasseCreateUpdateSchema(BaseModel):
     id: int
     nom: str
     prof: ProfSchema
 
+#Schema pour afficher classe
+class ClasseSchema(ClasseCreateUpdateSchema):
     class Config:
         from_attributes = True
