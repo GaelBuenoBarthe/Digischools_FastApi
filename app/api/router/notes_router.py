@@ -1,11 +1,12 @@
-from fastapi import APIRouter, Depends, Path
-from pymongo.database import Database
+from fastapi import APIRouter, Path
 from app.api.controller.notes_controller import *
 
-from app.domain.schemas.note_reponses_schema import NoteReponseProfClass
-from app.domain.schemas.note_reponse_stutri_schema import NoteReponseStuTri
+from app.domain.schemas.notes.note_reponses_schema import NoteReponseProfClass
+from app.domain.schemas.notes.note_reponse_stutri_schema import NoteReponseStuTri
 from app.util.mongo_singleton import MongoSingleton
-from app.domain.schemas.notes_schema import NoteSchema
+from app.domain.schemas.notes.notes_schema import NoteSchema
+from app.domain.schemas.notes.notes_create_schema import NoteCreateSchema
+from app.domain.schemas.notes.notes_update_schema import NoteUpdateSchema
 
 router = APIRouter()
 
@@ -14,14 +15,21 @@ async def read_all_notes(db: Database = Depends(MongoSingleton.get_db)):
     return await get_all_notes(db)
 
 
-@router.post("/notes")
-async def create_note_endpoint(note: NoteSchema, db: Database = Depends(MongoSingleton.get_db)):
-    """Endpoint to create a note."""
-    return await create_note(note.dict(), db)
+@router.post("/")
+def create_note_endpoint(note: NoteCreateSchema, db: Database = Depends(MongoSingleton.get_db)):
+    return create_note(note, db)
 
-@router.put("/{note_id}")
-async def update_note_endpoint(note_id: int, note: dict, db: Database = Depends(MongoSingleton.get_db)):
-    return await update_note(note_id, note, db)
+@router.put("/{note_id}", response_model=NoteUpdateSchema)
+async def update_note_endpoint(note_id: int, note: NoteUpdateSchema, db: Database = Depends(MongoSingleton.get_db)):
+    existing_note = db.notes.find_one({"idnotes": note_id})
+    if not existing_note:
+        raise HTTPException(status_code=404, detail="Note non trouvée")
+
+    update_data = {"note": note.note}
+    db.notes.update_one({"idnotes": note_id}, {"$set": update_data})
+
+    updated_note = db.notes.find_one({"idnotes": note_id})
+    return updated_note
 
 @router.delete("/{note_id}")
 async def delete_note_endpoint(note_id: int, db: Database = Depends(MongoSingleton.get_db)):
