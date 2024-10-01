@@ -1,11 +1,10 @@
-from fastapi import APIRouter, Depends, Path
-from pymongo.database import Database
+from fastapi import APIRouter, Path
 from app.api.controller.notes_controller import *
 
-from app.domain.schemas.note_reponses_schema import NoteReponseProfClass
-from app.domain.schemas.note_reponse_stutri_schema import NoteReponseStuTri
+from app.domain.schemas.notes.note_reponses_schema import NoteReponseProfClass
+from app.domain.schemas.notes.note_reponse_stutri_schema import NoteReponseStuTri
 from app.util.mongo_singleton import MongoSingleton
-from app.domain.schemas.notes_schema import NoteSchema
+from app.domain.schemas.notes.notes_schema import NoteSchema
 
 router = APIRouter()
 

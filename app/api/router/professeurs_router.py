@@ -3,12 +3,11 @@ from typing import List
 from fastapi import APIRouter, Depends
 from pymongo.database import Database
 
-from app.api.controller.professeurs_controller import get_all_professeurs, get_professeur_by_id, create_professeur, \
-    update_professeur, delete_professeur
+from app.api.controller.professeurs_controller import get_all_professeurs, get_professeur_by_id, delete_professeur
 from app.util.mongo_singleton import MongoSingleton
-from app.domain.schemas.professeurs_response_schema import ProfesseurResponseSchema
-from app.domain.schemas.professeur_update_schema import ProfesseurUpdateSchema
-from app.domain.schemas.professeur_create_schema import ProfesseurCreateSchema
+from app.domain.schemas.professeur.professeurs_response_schema import ProfesseurResponseSchema
+from app.domain.schemas.professeur.professeur_update_schema import ProfesseurUpdateSchema
+from app.domain.schemas.professeur.professeur_create_schema import ProfesseurCreateSchema
 
 router = APIRouter()
 

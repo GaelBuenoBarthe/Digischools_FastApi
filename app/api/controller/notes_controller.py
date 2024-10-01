@@ -3,8 +3,8 @@ import logging
 
 from app.util.mongo_singleton import MongoSingleton
 from pymongo.database import Database
-from app.domain.schemas.notes_schema import  NoteSchema
-from app.domain.schemas.note_reponses_schema import *
+from app.domain.schemas.notes.notes_schema import  NoteSchema
+from app.domain.schemas.notes.note_reponses_schema import *
 
 
 # Create a new note

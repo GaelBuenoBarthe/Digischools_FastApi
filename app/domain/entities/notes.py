@@ -1,6 +1,7 @@
 from datetime import datetime
 from bson import ObjectId
-from app.domain.schemas import notes_schema as NoteSchema
+from app.domain.schemas.notes import notes_schema as NoteSchema
+
 
 class Note:
     def __init__(self, idnotes: int, ideleve: ObjectId, idclasse: ObjectId, idmatiere: ObjectId, idprof: ObjectId, idtrimestre: ObjectId, note: int, date_saisie: datetime | None = None, avis: str | None = None, avancement: float | None = None):
