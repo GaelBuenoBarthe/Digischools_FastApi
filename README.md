@@ -64,7 +64,12 @@ Obtenir les notes par trimestre : GET /notes/trimester/{trimester_id}
 Obtenir les notes par élève et trimestre : GET /notes/student/{eleve_id}/trimester/{trimester_id}
 Obtenir les notes par professeur et classe : GET /notes/teacher/{professeur_id}/class/{classe_id}
 
+### Powerpoint
+
+Le powerpoint de présentation du projet est disponible dans le dossier ressources.
+
 ### License
+
 Bernardo Estacio Abreu
 Fabrice Bellin
 Gael Bueno Barthe
